@@ -23,7 +23,8 @@ const DEFAULT_DATA = {
   weightLog: [],   // [{date, weight}]
   foods: [],
   recipes: [],
-  habitsLog: {}    // date -> { habitId: bool }
+  habitsLog: {},   // date -> { habitId: bool }
+  shoppingList: [] // [{id, name, qty, checked}]
 };
 
 const HABIT_DEFS = [
@@ -155,6 +156,7 @@ const Store = {
     if(!this.data.dailyLogs) this.data.dailyLogs = {};
     if(!this.data.weightLog) this.data.weightLog = [];
     if(!this.data.habitsLog) this.data.habitsLog = {};
+    if(!this.data.shoppingList) this.data.shoppingList = [];
     this.save();
   },
   save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(this.data)); },
@@ -205,6 +207,7 @@ function switchView(view){
   if(view === 'weight') renderWeightView();
   if(view === 'nutrition') renderNutritionView();
   if(view === 'habits') renderHabitsView();
+  if(view === 'shopping') renderShoppingView();
   if(view === 'calendar') renderCalendarView();
   if(view === 'stats') renderStatsView();
   if(view === 'settings') renderSettingsView();
@@ -659,6 +662,66 @@ function renderHabitsView(){
 }
 
 /* =========================================================
+   SHOPPING LIST VIEW
+========================================================= */
+function renderShoppingView(){
+  const list = Store.data.shoppingList;
+  const pending = list.filter(i => !i.checked);
+  const done = list.filter(i => i.checked);
+
+  document.getElementById('shoppingEmptyMsg').style.display = list.length ? 'none' : 'block';
+
+  const pendingUl = document.getElementById('shoppingPendingList');
+  pendingUl.innerHTML = '';
+  pending.forEach(item => pendingUl.appendChild(buildShoppingRow(item)));
+
+  const doneCard = document.getElementById('shoppingDoneCard');
+  const doneTitle = document.getElementById('shoppingDoneTitle');
+  const doneUl = document.getElementById('shoppingDoneList');
+  doneUl.innerHTML = '';
+  if(done.length){
+    doneCard.style.display = 'block';
+    doneTitle.style.display = 'block';
+    done.forEach(item => doneUl.appendChild(buildShoppingRow(item)));
+  } else {
+    doneCard.style.display = 'none';
+    doneTitle.style.display = 'none';
+  }
+}
+function buildShoppingRow(item){
+  const li = document.createElement('li');
+  li.innerHTML = `
+    <span class="habit-name" style="${item.checked ? 'text-decoration:line-through; opacity:.5;' : ''}">
+      <input type="checkbox" class="switch" data-check="${item.id}" ${item.checked ? 'checked':''}>
+      ${item.name}${item.qty ? ' <span class="muted small">— '+item.qty+'</span>' : ''}
+    </span>
+    <button data-del="${item.id}" style="background:none;border:none;color:var(--c-muted);font-size:15px;">✕</button>`;
+  li.querySelector('[data-check]').onchange = (e) => {
+    item.checked = e.target.checked;
+    Store.save();
+    renderShoppingView();
+  };
+  li.querySelector('[data-del]').onclick = () => {
+    Store.data.shoppingList = Store.data.shoppingList.filter(i => i.id !== item.id);
+    Store.save();
+    renderShoppingView();
+  };
+  return li;
+}
+function addShoppingItem(name, qty){
+  if(!name.trim()) return;
+  Store.data.shoppingList.push({ id: uid(), name: name.trim(), qty: (qty||'').trim(), checked:false });
+  Store.save();
+  renderShoppingView();
+}
+function clearCheckedShoppingItems(){
+  if(!Store.data.shoppingList.some(i=>i.checked)) return;
+  Store.data.shoppingList = Store.data.shoppingList.filter(i => !i.checked);
+  Store.save();
+  renderShoppingView();
+}
+
+/* =========================================================
    CALENDAR VIEW
 ========================================================= */
 let calCursor = new Date();
@@ -839,6 +902,17 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('ingredientGrams').value = '';
     renderIngredientList();
   });
+
+  // Shopping list
+  document.getElementById('shoppingForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const nameInput = document.getElementById('shoppingItemName');
+    const qtyInput = document.getElementById('shoppingItemQty');
+    addShoppingItem(nameInput.value, qtyInput.value);
+    nameInput.value = ''; qtyInput.value = '';
+    nameInput.focus();
+  });
+  document.getElementById('clearCheckedBtn').addEventListener('click', clearCheckedShoppingItems);
 
   // Calendar nav
   document.getElementById('calPrev').addEventListener('click', () => { calCursor.setMonth(calCursor.getMonth()-1); renderCalendarView(); });
