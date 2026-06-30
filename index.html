@@ -56,6 +56,10 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
       <span>Hábitos</span>
     </button>
+    <button class="nav-item" data-view="shopping">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4M3 6h18M16 10a4 4 0 01-8 0"/></svg>
+      <span>Compra</span>
+    </button>
     <button class="nav-item" data-view="calendar">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
       <span>Calendario</span>
@@ -288,6 +292,31 @@
         <h3>Suplementos de hoy</h3>
         <ul class="habit-list" id="supplementList"></ul>
       </div>
+    </section>
+
+    <!-- ================= SHOPPING LIST ================= -->
+    <section class="view" id="view-shopping">
+      <div class="view-head">
+        <h1>Lista de la compra</h1>
+        <button class="icon-btn small" id="clearCheckedBtn" title="Borrar marcados">🗑</button>
+      </div>
+
+      <form id="shoppingForm" class="search-row" style="margin-bottom:14px;">
+        <input type="text" id="shoppingItemName" placeholder="Añadir artículo..." autocomplete="off" style="flex:2;">
+        <input type="text" id="shoppingItemQty" placeholder="Cant." autocomplete="off" style="flex:1; max-width:90px;">
+        <button type="submit" class="btn-primary small">+ Añadir</button>
+      </form>
+
+      <div class="card" style="padding:8px 14px;">
+        <ul class="habit-list" id="shoppingPendingList"></ul>
+      </div>
+
+      <h2 class="section-title" id="shoppingDoneTitle" style="display:none;">Ya en el carrito</h2>
+      <div class="card" id="shoppingDoneCard" style="display:none; padding:8px 14px;">
+        <ul class="habit-list" id="shoppingDoneList"></ul>
+      </div>
+
+      <p class="muted small" id="shoppingEmptyMsg" style="text-align:center; margin-top:30px;">Tu lista está vacía. Añade algo arriba 🛒</p>
     </section>
 
     <!-- ================= CALENDAR ================= -->
